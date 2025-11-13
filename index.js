@@ -48,34 +48,51 @@ const response = await fetch('https://www.hashrate.no/gpus/3080ti',{
 }
 });
 
+app.get('/algo-set', async (req, res) => {
+  try {
+    const url = "https://herominers.com";
+    const browser = await puppeteer.launch({
+  headless: true,
+  args: ["--no-sandbox", "--disable-setuid-sandbox"]
+});
+    const page = await browser.newPage();
 
-app.get('/algo-set',async(req,res)=>{
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
+    await page.goto(url, {
+  waitUntil: 'domcontentloaded', // or 'load'
+  timeout: 60000                 // 60 seconds
+});
+    await page.waitForSelector("#hashrate_randomx", { timeout: 10000 });
 
-  // Go to the page that includes 3.js
-  await page.goto('https://herominers.com/', { waitUntil: "networkidle0" });
+    await page.evaluate(() => {
+      const el = document.querySelector("#hashrate_randomx");
+      if (el) {
+        el.value = 16;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
 
-  // Wait for the hashrate input for RandomX to appear
-  await page.waitForSelector("#hashrate_randomx", { timeout: 10000 });
+    const stored = await page.evaluate(() => localStorage.getItem("hashrate_randomx_input"));
+    
+    
+await page.waitForSelector('#pool_info_monero [data-original-title="Earnings (USD)"]');
 
-  // Change the value to 16
-  await page.evaluate(() => {
-    const el = document.querySelector("#hashrate_randomx");
-    if (el) {
-      el.value = 16;
-      // Trigger the 'change' event so 3.js stores it in localStorage
-      el.dispatchEvent(new Event("change", { bubbles: true }));
-    }
-  });
+// Extract its text content
+const usdEarnings = await page.$eval(
+  '#pool_info_monero [data-original-title="Earnings (USD)"]',
+  el => el.textContent.trim()
+);
 
-  // Optional: verify it was stored in localStorage
-  const stored = await page.evaluate(() => localStorage.getItem("hashrate_randomx_input"));
-  res.send("Stored RandomX hashrate: "+ stored)
-  // console.log("Stored RandomX hashrate:", stored);
+console.log('USD earnings:', usdEarnings);
 
-  await browser.close();
-})
+
+    await browser.close();
+    res.send(`Stored RandomX hashrate: ${stored}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
 
 // Start server
 app.listen(PORT, () => {
