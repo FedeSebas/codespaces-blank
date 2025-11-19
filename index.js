@@ -53,7 +53,8 @@ app.get('/algo-set', async (req, res) => {
     const url = "https://herominers.com";
     const browser = await puppeteer.launch({
   headless: true,
-  args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  browser: 'chromium'
 });
     const page = await browser.newPage();
 
@@ -136,7 +137,8 @@ app.get('/parse-algos', async (req, res) => {
     const url1 = "https://www.hashrate.no/GPUcalculator?selected=3080ti-1";
     const browser1 = await puppeteer.launch({
   headless: true,
-  args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  browser: 'chromium'
 });
 const context = browser1.defaultBrowserContext();
 await context.setCookie({
@@ -285,7 +287,8 @@ let passAlgos = await page1.evaluate((algorithms) => {
  const url = "https://herominers.com";
     const browser = await puppeteer.launch({
   headless: true,
-  args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  browser: 'chromium'
 });
     const page = await browser.newPage();
 
