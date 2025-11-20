@@ -1,6 +1,7 @@
 // index.js
 import express from "express";
 import puppeteer from "puppeteer";
+import chromium from "chrome-aws-lambda";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -50,10 +51,12 @@ const response = await fetch('https://www.hashrate.no/GPUcalculator?selected=308
 
 app.get('/algo-set', async (req, res) => {
   try {
+    const executablePath = await chromium.executablePath;
     const url = "https://herominers.com";
     const browser = await puppeteer.launch({
-  headless: true,
-  args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  args: chromium.args,
+  executablePath: await chromium.executablePath,
+  headless: chromium.headless,
 });
     const page = await browser.newPage();
 
@@ -133,10 +136,12 @@ const algorithms = [
 
 app.get('/parse-algos', async (req, res) => {
   try {
+    const executablePath = await chromium.executablePath;
     const url1 = "https://www.hashrate.no/GPUcalculator?selected=3080ti-1";
     const browser1 = await puppeteer.launch({
-  headless: true,
-  args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  args: chromium.args,
+  executablePath: await chromium.executablePath,
+  headless: chromium.headless,
 });
 const context = browser1.defaultBrowserContext();
 await context.setCookie({
@@ -284,8 +289,9 @@ let passAlgos = await page1.evaluate((algorithms) => {
 
  const url = "https://herominers.com";
     const browser = await puppeteer.launch({
-  headless: true,
-  args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  args: chromium.args,
+  executablePath: await chromium.executablePath,
+  headless: chromium.headless,
 });
     const page = await browser.newPage();
 
